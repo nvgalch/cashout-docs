@@ -31,8 +31,7 @@ jobs:
         with:
           revision: pr-${{ github.event.pull_request.number }}
           src-root: ./docs
-          # если нужно — можно зафиксировать версию cli:
-          # cli-version: 5.23.0
+          cli-version: latest
 
       # Опционально: загрузить результат сборки как artifact GitHub
       - name: Upload build output
