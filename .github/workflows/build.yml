@@ -1,0 +1,46 @@
+name: Diplodoc PR preview ## как это работает - непонятно
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: diplodoc-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Важно: @diplodoc/cli 5.23+ требует npm >= 11.5.1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Upgrade npm
+        run: npm i -g npm@11.5.1
+
+      - name: Build docs (YFM)
+        uses: diplodoc-platform/docs-build-action@v3
+        with:
+          revision: pr-${{ github.event.pull_request.number }}
+          src-root: ./docs
+          # если нужно — можно зафиксировать версию cli:
+          # cli-version: 5.23.0
+
+      # Опционально: загрузить результат сборки как artifact GitHub
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: diplodoc-pr-build
+          path: |
+            ./.diplodoc/**
+            ./build/**
+            ./output/**
+          if-no-files-found: ignore

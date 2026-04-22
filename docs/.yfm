@@ -1,0 +1,20 @@
+allowHTML: true
+strict: true
+langs: ['ru']
+
+interface:
+  favicon-src: 'https://sun9-16.userapi.com/s/v1/ig2/cr9i4a69ibvANFCYi17ko1r8mSpKmo4mynFpbeqtIYaxx4MzTk6tVtO672E-vpzOuqJutV284IDh-TB3ByTwG0zP.jpg?quality=95&as=32x32,48x48,72x72,108x108,160x160,240x240,360x360,480x480,540x540,640x640,720x720,800x800&from=bu&cs=800x0'
+
+search:
+  provider: local
+  tolerance: 0
+  confidense: phrased
+
+extensions:
+  - './_extensions/breadcrumbs'
+
+breadcrumbs:
+  tocAsRoot: true
+
+docs-viewer:
+  themes: ['light','dark']

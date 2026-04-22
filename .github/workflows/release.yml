@@ -1,0 +1,66 @@
+name: Diplodoc Release ## как это работает - непонятно
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: diplodoc-release
+  cancel-in-progress: true
+
+jobs:
+  check-env:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required variables
+        env:
+          BUCKET: ${{ vars.DIPLODOC_STORAGE_BUCKET }}
+        run: |
+          if [ -z "$BUCKET" ]; then
+            echo "::error::Variable DIPLODOC_STORAGE_BUCKET is not set"
+            exit 1
+          fi
+
+  build:
+    needs: check-env
+    # Важно: не релизим, если PR просто закрыли без merge
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Upgrade npm
+        run: npm i -g npm@11.5.1
+
+      - name: Build docs (YFM)
+        uses: diplodoc-platform/docs-build-action@v3
+        with:
+          revision: ${{ github.sha }}
+          src-root: ./docs
+          # cli-version: 5.23.0
+
+  release:
+    needs: build
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release
+        uses: diplodoc-platform/docs-release-action@v3
+        with:
+          revision: ${{ github.sha }}
+          storage-bucket: ${{ vars.DIPLODOC_STORAGE_BUCKET }}
+          storage-access-key-id: ${{ secrets.DIPLODOC_ACCESS_KEY_ID }}
+          storage-secret-access-key: ${{ secrets.DIPLODOC_SECRET_ACCESS_KEY }}

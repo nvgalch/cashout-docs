@@ -1,0 +1,21 @@
+title: "Документация"
+description:
+  - Тут описание документа
+meta:
+  title: "Документация"
+  keywords:
+    - keyword: вк
+# Блок со ссылками
+links:
+- title: "Демо-страница"
+  description: "Страница, чтобы показать, что умеет диплодок"
+  href: "demo.md"
+- title: "Страница для внешних пользователей"
+  description: "Собирается только на внешний домен"
+  href: "ext.md"
+  when: audience == "external"
+- title: "Страница для внутренних пользователей"
+  description: "Собирается только на внутренний домен"
+  href: "int.md"
+  when: audience == "internal"
+
