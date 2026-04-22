@@ -1,4 +1,4 @@
-name: Diplodoc PR preview ## как это работает - непонятно
+name: Build & Check Diplodoc on PR
 
 on:
   pull_request:
