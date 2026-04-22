@@ -1,4 +1,5 @@
 "use strict";
+
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Extension = void 0;
 
@@ -31,8 +32,11 @@ class Extension {
         const breadcrumbCacheMap = new Map();
 
         getEntryHooks(run.entry).State.tap("Breadcrumbs", (state) => {
-          const toc = tocService.for(state.router.pathname);
-          if (!toc.items || toc.items.length === 0) return state;
+          // Важно: state.router.pathname обычно без расширения (ru/index),
+          // а tocService.for ожидает существующую ноду графа (часто ru/index.yaml или ru/page.md).
+          // Поэтому резолвим toc по нескольким кандидатам.
+          const toc = resolveToc(tocService, state.router.pathname);
+          if (!toc?.items || toc.items.length === 0) return state;
 
           const breadcrumbsMap = getBreadcrumbsMap(toc, options, breadcrumbCacheMap);
 
@@ -68,6 +72,32 @@ class Extension {
 exports.Extension = Extension;
 
 // ---- helpers ----
+
+function resolveToc(tocService, pathname) {
+  const normalized = String(pathname || "").replace(/^\//, "");
+
+  const candidates = [
+    normalized,
+    `${normalized}.yaml`,
+    `${normalized}.yml`,
+    `${normalized}.md`,
+    // иногда entry может быть index.* внутри директории
+    path.posix.join(normalized, "index.yaml"),
+    path.posix.join(normalized, "index.yml"),
+    path.posix.join(normalized, "index.md"),
+  ];
+
+  for (const c of candidates) {
+    try {
+      return tocService.for(c);
+    } catch (e) {
+      // игнорируем "Node does not exist" и пробуем следующий кандидат
+    }
+  }
+
+  // Если ничего не подошло — пусть упадёт с исходной ошибкой (так проще дебажить)
+  return tocService.for(normalized);
+}
 
 function isExternalHref(href) {
   return /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(href) || href.startsWith("//");
