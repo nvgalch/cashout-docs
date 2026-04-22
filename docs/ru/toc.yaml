@@ -1,11 +1,7 @@
 title: Документация
 href: index.yaml
 items:
-- name: Начало работы
-  href: demo.md
-- name: "{{ name }}"
-  when: audience == "internal"
-  href: int.md
-- name: "{{ name }}"
-  when: audience == "external"
-  href: ext.md
+- name: Страница 1
+  href: getting-started.md
+- name: Страница 2
+  href: page.md
